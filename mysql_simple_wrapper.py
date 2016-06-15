@@ -159,8 +159,8 @@ class Dbmysql(object):
                 logging.error('Exception raised: File "%s", '
                               'line %s , in %s "%s" : %s' %
                               (filename, lineno, fn, text, str(err)))
-                return False
-            return True
+            return False
+        return True
 
     def insert(self, table, row, dict_key=None):
         """Inert a row into table.
