@@ -162,12 +162,13 @@ class Dbmysql(object):
             return False
         return True
 
-    def insert(self, table, row, dict_key=None):
+    def insert(self, table, row, dict_key=None, ignore=False):
         """Inert a row into table.
 
         :param table: str, table name
         :param row: dict, row values
-        :dict_key: str, the column name converted from row's key
+        :param dict_key: str, the column name converted from row's key
+        :param ignore: boolean, use 'insert ignore' instead of 'insert'
         :return: (boolean, int), (success_flag, lastrowid)
         """
         if not row:
@@ -202,13 +203,18 @@ class Dbmysql(object):
 
         ikys = ikys[:-2]
         iqs = iqs[:-2]
-        sql = 'insert into %s(%s) values(%s);' % (table, ikys, iqs)
+
+        if not ignore:
+            sql = 'insert into %s(%s) values(%s);' % (table, ikys, iqs)
+        else:
+            sql = 'insert ignore into %s(%s) values(%s);' % (table, ikys, iqs)
 
         if not self._cur_execute(sql, values):
             return False, None
         return True, self.cur.lastrowid
 
-    def insertmany(self, table, rows, dict_key=None, per=1000, sort=False):
+    def insertmany(self, table, rows,
+                   dict_key=None, per=1000, sort=False, ignore=False):
         """Inert rows into a table.
 
         :param table: str, table name
@@ -216,6 +222,7 @@ class Dbmysql(object):
         :param dict_key: str, the column name converted from row's key
         :param per: int, num of rows insert once
         :param sort: boolean, insert rows sort by dict_key
+        :param ignore: boolean, use 'insert ignore' instead of 'insert'
         :return: (boolean, int), (success_flag, lastrowid)
         """
         if not rows:
@@ -267,7 +274,11 @@ class Dbmysql(object):
         ikys = ikys[:-2]
         iqs = iqs[:-2]
 
-        sql = 'insert into %s(%s) values(%s);' % (table, ikys, iqs)
+        if not ignore:
+            sql = 'insert into %s(%s) values(%s);' % (table, ikys, iqs)
+        else:
+            sql = 'insert ignore into %s(%s) values(%s);' % (table, ikys, iqs)
+
         m = 0
         num = len(values)
 
