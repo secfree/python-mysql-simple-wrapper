@@ -1,2 +1,5 @@
 .idea
 .tags
+build
+dist
+python_mysql_simple_wrapper.egg-info

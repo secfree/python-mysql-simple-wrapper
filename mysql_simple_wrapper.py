@@ -413,5 +413,7 @@ class Dbmysql(object):
     def close(self):
         """Close connection
         """
-        self.cur.close()
-        self.con.close()
+        if self.cur:
+            self.cur.close()
+        if self.con:
+            self.con.close()
