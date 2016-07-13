@@ -128,7 +128,7 @@ class Dbmysql(object):
         try:
             self.cur.execute(sql)
         except mysql.connector.Error as err:
-            # ER_TABLE_EXISTS_ERROR, 创建已存在的表报警忽略
+            # ER_TABLE_EXISTS_ERROR, ignore table exists error
             if err.errno == 1050:
                 return True
             logger.error('Execute [%s] failed: %s', sql, err)
