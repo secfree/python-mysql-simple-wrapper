@@ -8,13 +8,13 @@ Authors: secfree(zzd7zzd@gmail.com)
 """
 
 
-import sys
 import logging
-import traceback
 import time
 import collections
 
 import mysql.connector
+
+logger = logging.getLogger(__name__)
 
 
 class Dbmysql(object):
@@ -40,11 +40,8 @@ class Dbmysql(object):
             try:
                 self.con = mysql.connector.connect(**self.db_config)
             except mysql.connector.Error as err:
-                for frame in traceback.extract_tb(sys.exc_info()[2]):
-                    filename, lineno, fn, text = frame
-                    logging.error('Exception raised: File "%s", '
-                                  'line %s , in %s "%s" : %s' %
-                                  (filename, lineno, fn, text, str(err)))
+                logger.error('Connect to database with %s failed: %s',
+                             self.db_config, err)
                 time.sleep(5)
                 continue
             self.cur = self.con.cursor(dictionary=True)
@@ -62,11 +59,7 @@ class Dbmysql(object):
             try:
                 self.con.reconnect()
             except mysql.connector.Error as err:
-                for frame in traceback.extract_tb(sys.exc_info()[2]):
-                    filename, lineno, fn, text = frame
-                    logging.error('Exception raised: File "%s", '
-                                  'line %s , in %s "%s" : %s' %
-                                  (filename, lineno, fn, text, str(err)))
+                logger.error('Reconnect failed: %s', err)
                 time.sleep(5)
                 continue
             self.cur = self.con.cursor(dictionary=True)
@@ -97,11 +90,7 @@ class Dbmysql(object):
         try:
             self.con.commit()
         except mysql.connector.Error as err:
-            for frame in traceback.extract_tb(sys.exc_info()[2]):
-                filename, lineno, fn, text = frame
-                logging.error('Exception raised: File "%s", '
-                              'line %s , in %s "%s" : %s' %
-                              (filename, lineno, fn, text, str(err)))
+            logger.error('Commit failed: %s', err)
             return False
         return True
 
@@ -111,11 +100,7 @@ class Dbmysql(object):
         try:
             self.cur.execute(sql, values)
         except mysql.connector.Error as err:
-            for frame in traceback.extract_tb(sys.exc_info()[2]):
-                filename, lineno, fn, text = frame
-                logging.error('Exception raised: File "%s", '
-                              'line %s , in %s "%s" : %s' %
-                              (filename, lineno, fn, text, str(err)))
+            logger.error('Execute [%s] failed: %s', sql, err)
             return False
         return True
 
@@ -125,11 +110,7 @@ class Dbmysql(object):
         try:
             self.cur.executemany(sql, values)
         except mysql.connector.Error as err:
-            for frame in traceback.extract_tb(sys.exc_info()[2]):
-                filename, lineno, fn, text = frame
-                logging.error('Exception raised: File "%s", '
-                              'line %s , in %s "%s" : %s' %
-                              (filename, lineno, fn, text, str(err)))
+            logger.error('Executemany [%s] failed: %s', sql, err)
             return False
         return True
 
@@ -137,11 +118,7 @@ class Dbmysql(object):
         try:
             rows = self.cur.fetchall()
         except mysql.connector.Error as err:
-            for frame in traceback.extract_tb(sys.exc_info()[2]):
-                filename, lineno, fn, text = frame
-                logging.error('Exception raised: File "%s", '
-                              'line %s , in %s "%s" : %s' %
-                              (filename, lineno, fn, text, str(err)))
+            logger.error('Fetchall failed: %s', err)
             return False, None
         return True, rows
 
@@ -154,11 +131,7 @@ class Dbmysql(object):
             # ER_TABLE_EXISTS_ERROR, 创建已存在的表报警忽略
             if err.errno == 1050:
                 return True
-            for frame in traceback.extract_tb(sys.exc_info()[2]):
-                filename, lineno, fn, text = frame
-                logging.error('Exception raised: File "%s", '
-                              'line %s , in %s "%s" : %s' %
-                              (filename, lineno, fn, text, str(err)))
+            logger.error('Execute [%s] failed: %s', sql, err)
             return False
         return True
 
