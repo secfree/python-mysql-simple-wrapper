@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='python-mysql-simple-wrapper',
-    version='1.2.5',
+    version='1.2.6',
     url='https://github.com/secfree/python-mysql-simple-wrapper',
     author='secfree',
     description='A simple wrapper for operation on mysql.',

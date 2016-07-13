@@ -34,6 +34,7 @@ class Dbmysql(object):
         """
         Connect to database.
 
+        :param retry: int, connect retry times
         :return: boolean, success_flag
         """
         for _ in range(retry):
@@ -52,7 +53,7 @@ class Dbmysql(object):
     def reconnect(self, retry=3):
         """Ensure connection is not closed
 
-        :param retry: int, connection retry number
+        :param retry: int, connect retry times
         :return: boolean, success_flag
         """
         for _ in range(retry):
@@ -341,6 +342,7 @@ class Dbmysql(object):
         """
         Execute a sql.
 
+        :param sql: str, sql statement
         :param dict_key: str, the column's value used as row's key
         :return: (boolean, *), (success_flag, result)
         """
@@ -365,6 +367,22 @@ class Dbmysql(object):
             if isinstance(dk, collections.Hashable):
                 dict_rows[dk] = r
         return True, dict_rows
+
+    def executemany(self, sql, values):
+        """
+        Execute a sql with many values.
+        :param sql: str, sql statement
+        :param values: list, list of value tuple
+        :return: boolean, success_flag
+        """
+        if not self.ensure_connect():
+            return False
+        try:
+            self.cur.executemany(sql, values)
+        except mysql.connector.Error as err:
+            logger.error('Executemany [%s] failed: %s', sql, err)
+            return False
+        return True
 
     def delete(self, table, **conditions):
         """delete rows
