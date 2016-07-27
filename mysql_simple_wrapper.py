@@ -368,20 +368,21 @@ class Dbmysql(object):
                 dict_rows[dk] = r
         return True, dict_rows
 
-    def executemany(self, sql, values):
+    def executemany(self, sql, values, per=1000):
         """
         Execute a sql with many values.
         :param sql: str, sql statement
         :param values: list, list of value tuple
+        :param per: int, num of rows insert once
         :return: boolean, success_flag
         """
-        if not self.ensure_connect():
-            return False
-        try:
-            self.cur.executemany(sql, values)
-        except mysql.connector.Error as err:
-            logger.error('Executemany [%s] failed: %s', sql, err)
-            return False
+        m = 0
+        num = len(values)
+
+        while m < num:
+            if not self._cur_executemany(sql, values[m:m+per]):
+                return False
+            m += per
         return True
 
     def delete(self, table, **conditions):
