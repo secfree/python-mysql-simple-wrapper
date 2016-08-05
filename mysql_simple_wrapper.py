@@ -118,6 +118,9 @@ class Dbmysql(object):
     def _cur_fetch(self):
         try:
             rows = self.cur.fetchall()
+            # Without commit after fetchall, calling a same select query
+            # the return results won't update
+            self.con.commit()
         except mysql.connector.Error as err:
             logger.error('Fetchall failed: %s', err)
             return False, None
