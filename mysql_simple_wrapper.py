@@ -101,6 +101,9 @@ class Dbmysql(object):
         try:
             self.cur.execute(sql, values)
         except mysql.connector.Error as err:
+            # ER_TABLE_EXISTS_ERROR, ignore table exists error
+            if err.errno == 1050:
+                return True
             logger.error('Execute [%s] failed: %s', sql, err)
             return False
         return True
@@ -125,19 +128,6 @@ class Dbmysql(object):
             logger.error('Fetchall failed: %s', err)
             return False, None
         return True, rows
-
-    def _execute_any(self, sql):
-        if not self.ensure_connect():
-            return False
-        try:
-            self.cur.execute(sql)
-        except mysql.connector.Error as err:
-            # ER_TABLE_EXISTS_ERROR, ignore table exists error
-            if err.errno == 1050:
-                return True
-            logger.error('Execute [%s] failed: %s', sql, err)
-            return False
-        return True
 
     def insert(self, table, row, dict_key=None, ignore=False):
         """Inert a row into table.
@@ -341,15 +331,16 @@ class Dbmysql(object):
 
         return self._cur_execute(sql, values)
 
-    def execute(self, sql, dict_key=None):
+    def execute(self, sql, dict_key=None, values=()):
         """
         Execute a sql.
 
         :param sql: str, sql statement
         :param dict_key: str, the column's value used as row's key
+        :param values: tuple, tuple of values
         :return: (boolean, *), (success_flag, result)
         """
-        if not self._execute_any(sql):
+        if not self._cur_execute(sql, values):
             return False, None
         if not self.cur.with_rows:
             return True, None
