@@ -15,7 +15,7 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'mysql-connector-python'
+        'mysql-connector'
     ],
     classifiers=[
         'Intended Audience :: Developers',
